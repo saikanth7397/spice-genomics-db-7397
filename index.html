@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spice SSR Genomics Explorer</title>
+<style>
+body { font-family: Arial; margin: 20px; }
+input, select, button { margin: 5px; padding: 6px; }
+table { border-collapse: collapse; margin-top: 20px; width: 100%; }
+th, td { border: 1px solid #ccc; padding: 6px; }
+th { background: #f4f4f4; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+let motifChart = null;
+
+async function loadMotifChart() {
+  const crop = document.getElementById("crop").value;
+  const url = `http://127.0.0.1:8001/motif-analysis?crop=${crop}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const labels = data.results.slice(0, 15).map(x => x.motif_standard);
+  const counts = data.results.slice(0, 15).map(x => x.motif_count);
+
+  const ctx = document.getElementById("motifChart");
+
+  if (motifChart) {
+    motifChart.destroy();
+  }
+
+  motifChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Top SSR Motifs",
+        data: counts
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Top 15 SSR Motifs by Crop"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+</script>
+
+</head>
+<body>
+
+<h2>Spice SSR Genomics Explorer</h2>
+
+<label>Crop:</label>
+<select id="crop">
+<option>Capsicum_annuum</option>
+<option>Zingiber_officinale</option>
+<option>Coriandrum_sativum</option>
+<option>Curcuma_longa</option>
+<option>Apium_graveolens</option>
+<option>Vanilla_planifolia</option>
+</select>
+
+<label>Trait:</label>
+<select id="trait">
+<option value="">Any</option>
+<option>Pungency</option>
+<option>Aroma</option>
+<option>Flavor</option>
+<option>Anti-inflammatory</option>
+<option>General</option>
+</select>
+
+<label>Feature:</label>
+<select id="feature">
+<option value="">Any</option>
+<option>CDS</option>
+<option>exon</option>
+<option>intron</option>
+<option>gene</option>
+<option>intergenic</option>
+</select>
+
+<label>Limit:</label>
+<input id="limit" value="20" size="5">
+
+<button onclick="searchSSR()">Search</button>
+<button onclick="downloadCSV()">Download CSV</button>
+
+
+<h3>Motif Frequency Chart</h3>
+<button onclick="loadMotifChart()">Show Motif Chart</button>
+<canvas id="motifChart" width="900" height="350"></canvas>
+
+<table id="results"></table>
+
+
+<script>
+let lastResults = [];
+
+async function searchSSR() {
+  const crop = document.getElementById("crop").value;
+  const trait = document.getElementById("trait").value;
+  const feature = document.getElementById("feature").value;
+  const limit = document.getElementById("limit").value;
+
+  let url = `http://127.0.0.1:8001/search?crop=${crop}&limit=${limit}`;
+  if (trait) url += `&trait=${trait}`;
+  if (feature) url += `&feature=${feature}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  lastResults = data.results;
+
+  const table = document.getElementById("results");
+  table.innerHTML = "";
+
+  if (!data.results || data.results.length === 0) {
+    table.innerHTML = "<tr><td>No results found</td></tr>";
+    return;
+  }
+
+  const headers = Object.keys(data.results[0]);
+  table.innerHTML += "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+
+  data.results.forEach(row => {
+    table.innerHTML += "<tr>" + headers.map(h => `<td>${row[h] ?? ""}</td>`).join("") + "</tr>";
+  });
+}
+
+function downloadCSV() {
+  if (lastResults.length === 0) {
+    alert("No data to download");
+    return;
+  }
+
+  const headers = Object.keys(lastResults[0]);
+  let csv = headers.join(",") + "\n";
+
+  lastResults.forEach(row => {
+    csv += headers.map(h => `"${row[h] ?? ""}"`).join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ssr_results.csv";
+  a.click();
+}
+
+let motifChart = null;
+
+async function loadMotifChart() {
+  const crop = document.getElementById("crop").value;
+  const url = `http://127.0.0.1:8001/motif-analysis?crop=${crop}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const labels = data.results.slice(0, 15).map(x => x.motif_standard);
+  const counts = data.results.slice(0, 15).map(x => x.motif_count);
+
+  const ctx = document.getElementById("motifChart");
+
+  if (motifChart) {
+    motifChart.destroy();
+  }
+
+  motifChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Top SSR Motifs",
+        data: counts
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: "Top 15 SSR Motifs by Crop"
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+</script>
+
+
+</body>
+</html>

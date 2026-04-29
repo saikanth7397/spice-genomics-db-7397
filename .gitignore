@@ -1,0 +1,15 @@
+# Sensitive
+.env
+
+# Large genome files
+*.fna
+*.gz
+*.faa
+*.fxi
+*.fai
+
+# Outputs & backups
+BACKUP/
+ssr*
+__pycache__/
+*.pyc
