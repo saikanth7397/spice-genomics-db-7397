@@ -1,37 +1,25 @@
-# Spice SSR Genomics Database
+# Spice Genomics SSR Database
 
-## Overview
-A full-stack bioinformatics platform for SSR marker exploration across spice crops.
+A full-stack bioinformatics platform for searching SSR markers across spice crops with gene, trait, and phytochemical annotations.
 
-## Features
-- 1.6M+ SSR markers
-- Gene, trait, and phytochemical integration
-- FastAPI backend
-- Interactive web UI
-- Motif analysis and visualization
-- CSV export functionality
+## Project Highlights
+- Built a normalized MySQL database for 1.6M+ SSR markers
+- Integrated crop, gene, feature, trait, and phytochemical information
+- Developed FastAPI backend for live querying
+- Created browser-based UI with motif visualization
 
 ## Tech Stack
-- MySQL (normalized schema)
-- FastAPI (backend API)
-- HTML + JS (frontend)
-- Chart.js (visualization)
+- MySQL
+- FastAPI
+- HTML, JavaScript
+- Chart.js
 
-## API Endpoints
-- /search
-- /motif-analysis
+## API Examples
 
-## Run Locally
+/search?crop=Capsicum_annuum&trait=Pungency&limit=10
 
-### Backend
-pip install -r requirements.txt  
-python -m uvicorn app:app --reload --port 8001  
-
-### Frontend
-python -m http.server 8080  
-
-Open in browser:
-http://127.0.0.1:8080/index.html
+/motif-analysis?crop=Zingiber_officinale
 
 ## Author
-M.Pharm Pharmacology | BITS Pilani
+Saikanth Kamlikar  
+M.Pharm Pharmacology, BITS Pilani
